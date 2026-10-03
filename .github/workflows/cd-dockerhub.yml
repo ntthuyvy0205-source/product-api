@@ -64,3 +64,42 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/product-api:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/product-api:${{ github.sha }}
+
+  deploy-local:
+    needs: build-test-push
+    runs-on: [self-hosted, Windows, X64]
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Pull latest image
+        run: docker compose -p product-api -f docker-compose-prod.yaml pull
+
+      - name: Deploy to Local Docker Engine
+        run: docker compose -p product-api -f docker-compose-prod.yaml up -d
+
+      - name: Show containers
+        run: docker compose -p product-api -f docker-compose-prod.yaml ps
+
+      - name: Verify Product API container
+        shell: powershell
+        run: |
+          Start-Sleep -Seconds 15
+          $health = docker inspect product-api-prod --format='{{.State.Health.Status}}'
+          Write-Host "Product API health: $health"
+
+          if ($health -ne "healthy") {
+            docker logs product-api-prod
+            exit 1
+          }
+
+      - name: Test deployed API
+        shell: powershell
+        run: |
+          $response = Invoke-WebRequest -Uri "http://localhost:3000/" -UseBasicParsing
+          Write-Host $response.Content
+
+          if ($response.StatusCode -ne 200) {
+            exit 1
+          }
