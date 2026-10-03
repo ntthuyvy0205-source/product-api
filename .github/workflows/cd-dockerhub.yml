@@ -6,6 +6,10 @@ on:
       - main
 
 jobs:
+
+  # =========================
+  # JOB 1: CI + PUSH DOCKER HUB
+  # =========================
   build-test-push:
     runs-on: ubuntu-latest
 
@@ -65,7 +69,10 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/product-api:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/product-api:${{ github.sha }}
 
-    deploy-local:
+  # =========================
+  # JOB 2: DEPLOY VỀ MÁY LOCAL
+  # =========================
+  deploy-local:
     needs: build-test-push
     runs-on: [self-hosted, Windows, X64]
 
@@ -79,20 +86,24 @@ jobs:
 
       - name: Deploy to Local Docker Engine
         shell: cmd
-        run: docker compose -p product-api -f docker-compose-prod.yaml up -d
+        run: docker compose -p product-api -f docker-compose-prod.yaml up -d --wait --wait-timeout 60
 
       - name: Show containers
         shell: cmd
         run: docker compose -p product-api -f docker-compose-prod.yaml ps
 
-      - name: Wait for healthcheck
-        shell: cmd
-        run: timeout /t 15 /nobreak
-
       - name: Verify Product API container
         shell: cmd
         run: docker inspect product-api-prod --format="{{.State.Health.Status}}" | findstr /x healthy
 
+      - name: Verify MongoDB container
+        shell: cmd
+        run: docker inspect nammongodb-prod --format="{{.State.Health.Status}}" | findstr /x healthy
+
       - name: Test deployed API
         shell: cmd
         run: curl --fail http://localhost:3000/
+
+      - name: Test deployed products endpoint
+        shell: cmd
+        run: curl --fail http://localhost:3000/api/products
