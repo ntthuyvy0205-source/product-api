@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "seed": "node scripts/seed-product.js"
+    "seed": "node scripts/seed-product.js",
+    "test:ci": "node scripts/ci-cd-test.js"
   },
   "repository": {
     "type": "git",
