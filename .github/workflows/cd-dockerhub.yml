@@ -65,7 +65,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/product-api:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/product-api:${{ github.sha }}
 
-  deploy-local:
+    deploy-local:
     needs: build-test-push
     runs-on: [self-hosted, Windows, X64]
 
@@ -74,32 +74,25 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Pull latest image
+        shell: cmd
         run: docker compose -p product-api -f docker-compose-prod.yaml pull
 
       - name: Deploy to Local Docker Engine
+        shell: cmd
         run: docker compose -p product-api -f docker-compose-prod.yaml up -d
 
       - name: Show containers
+        shell: cmd
         run: docker compose -p product-api -f docker-compose-prod.yaml ps
 
-      - name: Verify Product API container
-        shell: powershell
-        run: |
-          Start-Sleep -Seconds 15
-          $health = docker inspect product-api-prod --format='{{.State.Health.Status}}'
-          Write-Host "Product API health: $health"
+      - name: Wait for healthcheck
+        shell: cmd
+        run: timeout /t 15 /nobreak
 
-          if ($health -ne "healthy") {
-            docker logs product-api-prod
-            exit 1
-          }
+      - name: Verify Product API container
+        shell: cmd
+        run: docker inspect product-api-prod --format="{{.State.Health.Status}}" | findstr /x healthy
 
       - name: Test deployed API
-        shell: powershell
-        run: |
-          $response = Invoke-WebRequest -Uri "http://localhost:3000/" -UseBasicParsing
-          Write-Host $response.Content
-
-          if ($response.StatusCode -ne 200) {
-            exit 1
-          }
+        shell: cmd
+        run: curl --fail http://localhost:3000/
