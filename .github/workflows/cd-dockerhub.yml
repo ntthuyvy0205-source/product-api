@@ -93,12 +93,26 @@ jobs:
         run: docker compose -p product-api -f docker-compose-prod.yaml ps
 
       - name: Verify Product API container
-        shell: cmd
-        run: docker inspect product-api-prod --format="{{.State.Health.Status}}" | findstr /x healthy
+        shell: bash
+        run: |
+          status=$(docker inspect --format='{{.State.Health.Status}}' product-api-prod)
+          echo "Product API health: $status"
+
+          if [ "$status" != "healthy" ]; then
+            docker logs product-api-prod
+            exit 1
+          fi
 
       - name: Verify MongoDB container
-        shell: cmd
-        run: docker inspect nammongodb-prod --format="{{.State.Health.Status}}" | findstr /x healthy
+        shell: bash
+        run: |
+          status=$(docker inspect --format='{{.State.Health.Status}}' nammongodb-prod)
+          echo "MongoDB health: $status"
+
+          if [ "$status" != "healthy" ]; then
+            docker logs nammongodb-prod
+            exit 1
+          fi
 
       - name: Test deployed API
         shell: cmd
