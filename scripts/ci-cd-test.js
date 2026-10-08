@@ -14,6 +14,15 @@ async function testAPI() {
       throw new Error("Products API failed");
     }
 
+    // Test thêm: sản phẩm không tồn tại phải trả về 404
+    const notFound = await fetch(
+      "http://localhost:3000/api/products/P999"
+    );
+
+    if (notFound.status !== 404) {
+      throw new Error("GET product not found test failed");
+    }
+
     console.log("CI/CD test passed");
   } catch (error) {
     console.error("CI/CD test failed:", error.message);
