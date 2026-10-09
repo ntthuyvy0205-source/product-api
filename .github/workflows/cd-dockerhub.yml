@@ -14,6 +14,11 @@ jobs:
         image: mongo:latest
         ports:
           - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout code
@@ -27,12 +32,16 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Start API
+      - name: Start Product API
         run: |
           MONGO_URI=mongodb://localhost:27017/productdb PORT=3000 node app.js &
           sleep 5
 
-      - name: Run test
+      - name: Health check Product API
+        run: |
+          curl --fail http://localhost:3000/
+
+      - name: Run CI test
         run: npm run test:ci
 
       - name: Login Docker Hub
@@ -47,3 +56,30 @@ jobs:
           context: .
           push: true
           tags: ntthuyvy/product-api:latest
+
+  deploy-local:
+    needs: build-test-push
+
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Pull latest Docker image
+        shell: cmd
+        run: |
+          docker compose -f docker-compose-prod.yaml pull
+
+      - name: Deploy to Local Docker Engine
+        shell: cmd
+        run: |
+          docker compose -f docker-compose-prod.yaml up -d
+
+      - name: Check production containers
+        shell: cmd
+        run: |
+          docker compose -f docker-compose-prod.yaml ps
