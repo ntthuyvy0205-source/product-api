@@ -6,7 +6,6 @@ on:
       - main
 
 jobs:
-
   ci:
     runs-on: ubuntu-latest
 
@@ -36,7 +35,6 @@ jobs:
       - name: Run CI test
         run: npm run test:ci
 
-
   cd:
     needs: ci
     runs-on: ubuntu-latest
@@ -57,21 +55,3 @@ jobs:
           context: .
           push: true
           tags: ntthuyvy/product-api:latest
-
-
-  deploy:
-    needs: cd
-    runs-on:
-      - self-hosted
-      - Windows
-      - X64
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy local
-        shell: cmd
-        run: |
-          docker compose -f docker-compose-prod.yaml pull
-          docker compose -f docker-compose-prod.yaml up -d
