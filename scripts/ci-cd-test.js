@@ -14,13 +14,11 @@ async function testAPI() {
       throw new Error("Products API failed");
     }
 
-    const notFound = await fetch(
-  "http://localhost:3000/api/products/P999"
-);
+    const notFound = await fetch("http://localhost:3000/api/products/P888");
 
-if (notFound.status !== 404) {
-  throw new Error("GET product not found test failed");
-}
+    if (notFound.status !== 404) {
+      throw new Error("GET product not found test failed");
+    }
 
     console.log("CI/CD test passed");
   } catch (error) {
