@@ -10,6 +10,20 @@ const app = express();
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+  const start = Date.now();
+
+  res.on("finish", () => {
+    const time = Date.now() - start;
+
+    console.log(
+      `${req.method} ${req.originalUrl} - ${res.statusCode} - ${time}ms`
+    );
+  });
+
+  next();
+});
+
 app.use("/api/products", productRoutes);
 
 app.get("/", (req, res) => {
