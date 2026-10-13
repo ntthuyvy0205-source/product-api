@@ -2,12 +2,13 @@
   "name": "product-api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
     "seed": "node scripts/seed-product.js",
-    "test:ci": "node scripts/ci-cd-test.js"
+    "test": "node --test scripts/ci-cd-test.js",
+    "test:ci": "node --test scripts/ci-cd-test.js"
   },
   "repository": {
     "type": "git",
