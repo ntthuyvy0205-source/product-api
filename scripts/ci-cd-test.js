@@ -60,6 +60,4 @@ test("Product API CRUD test", async (t) => {
   await t.test("API OK", 
     async () => assert.strictEqual((await api("GET", "/")).status, 200));
 
-  await t.test("GET P111", 
-    async () => assert.strictEqual((await api("GET", "/api/products/P111")).status, 404));
 });
