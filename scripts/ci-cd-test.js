@@ -57,12 +57,9 @@ test("Product API CRUD test", async (t) => {
     assert.ok(res.status === 200 || res.status === 204);
   });
 
-  // await t.test(
-  //   "DELETE: đọc lại sản phẩm đã xóa -> 404",
-  //   async () => {
-  //     const res = await api("GET", "/api/products/P111");
-  //     assert.strictEqual(res.status, 404);
-  //   }
-  // );
+  await t.test("API OK", 
+    async () => assert.strictEqual((await api("GET", "/")).status, 200));
 
+  // await t.test("GET P111", 
+  // async () => assert.strictEqual((await api("GET", "/api/products/P111")).status, 404));
 });
