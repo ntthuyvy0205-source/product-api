@@ -45,37 +45,22 @@ test("Product API CRUD test", async (t) => {
   });
 
   await t.test("READ: đọc sản phẩm P111", async () => {
-    const res = await api(
-      "GET",
-      "/api/products/P111"
-    );
-
+    const res = await api("GET","/api/products/P111");
     assert.strictEqual(res.status, 200);
 
     const product = await res.json();
-
     assert.strictEqual(product.pid, "P111");
   });
 
   await t.test("DELETE: xóa sản phẩm P111", async () => {
-    const res = await api(
-      "DELETE",
-      "/api/products/P111"
-    );
-
-    assert.ok(
-      res.status === 200 || res.status === 204
-    );
+    const res = await api("DELETE","/api/products/P111");
+    assert.ok(res.status === 200 || res.status === 204);
   });
 
   await t.test(
     "DELETE: đọc lại sản phẩm đã xóa -> 404",
     async () => {
-      const res = await api(
-        "GET",
-        "/api/products/P111"
-      );
-
+      const res = await api("GET", "/api/products/P111");
       assert.strictEqual(res.status, 404);
     }
   );
