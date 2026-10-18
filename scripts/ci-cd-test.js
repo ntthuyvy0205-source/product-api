@@ -57,4 +57,6 @@ test("Product API CRUD test", async (t) => {
     assert.ok(res.status === 200 || res.status === 204);
   });
 
+  await t.test("API OK", 
+    async () => assert.strictEqual((await api("GET", "/")).status, 200));
 });
